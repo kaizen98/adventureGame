@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+	<head></head>
+	<style>
+	</style>
+	<body>
+		<div>
+			<h1>Adventure Game</h1>
+			<canvas id="canvas" width="1000" height="1000"></canvas>
+		</div>
+	</body>
+</html>
+
+<script>
+	const canvas = document.getElementById('canvas');
+	const ctx = canvas.getContext('2d');
+
+	function getStatus() {
+		let xhr = new XMLHttpRequest();
+		xhr.open("GET", "http://127.0.0.1:5000/getStatus")
+		xhr.send();
+		xhr.onload = function() {
+			JSON.stringify(xhr.response);
+			redraw(JSON.parse(xhr.response));
+		};
+	}
+
+	function update() {
+		status = getStatus();
+	}
+
+	// function renderLine(lineData, linePosition) {
+	// 	lineData.forEach(function (elem) {
+	// 		switch(elem) {
+	// 			case "-":
+	// 				var j = 0;
+	// 				lineData.forEach(function(element) {
+	// 					ctx.moveTo(linePosition[0],linePosition[1]);
+	// 					for(var i = 1; i != lineData.length; i++) {
+	// 						j = j + 200;
+	// 						ctx.lineTo(j,linePosition[1]);
+	// 						ctx.stroke();
+	// 					};
+	// 				});
+	// 				break;
+	// 			case "|":
+	// 				//alert("hey 2");
+	// 				break;
+	// 			case " ":
+	// 				//alert("space");
+	// 				break;
+	// 			default:
+	// 				break;
+	// 		}
+	// 	});
+	// }
+
+	function redraw(status) {
+		var newlinetimes = 0;
+		var carrot = [50, 50];
+		var wall = 50;
+		var currentLine = 0;
+		status.forEach(function (item) {
+			switch(item) {
+				case "space":
+					carrot[0] = carrot[0] + wall;
+					break;
+				case "hwall":
+					ctx.moveTo(carrot[0], carrot[1]);
+					ctx.lineTo(carrot[0] + wall, carrot[1]);
+					ctx.stroke();
+					carrot[0] = carrot[0] + wall;
+					break;
+				case "vwall":
+					ctx.moveTo(carrot[0], carrot[1]);
+					ctx.lineTo(carrot[0], carrot[1]+wall);
+					ctx.stroke();
+					if ((newlinetimes%currentLine) == 1) {
+						carrot[1] = carrot[1] + wall;
+						currentLine = newlinetimes;
+					}
+					break;
+				case "player":
+					// ctx.moveTo(carrot[0], carrot[1]);
+					// ctx.beginPath();
+					// ctx.arc(100, 75, 40, 0, 2 * Math.PI);
+					// ctx.stroke();
+					break;
+				case "newline":
+					carrot[0] = 50;
+					carrot[1] = 50+(newlinetimes*wall);
+					newlinetimes = newlinetimes+1;
+					break;
+			}
+		});
+		// status = status.replace(/\\n/g, '');
+		// status = status.replace(/\\/g, '');
+		// status = status.substring(1, status.length-1)
+		// var linePosition = [50, 50];
+		// for (var i = 0; i < status.length; i++) {
+		// 	linePosition[0] = linePosition[0]+50;
+		// 	// linePosition[1] = linePosition[1]+50;
+		// 	var obj = status[i];
+		// 	renderLine(obj, linePosition);
+		// }
+		//document.getElementById("gameView").innerHTML = status;
+	}
+
+	window.setInterval(function(){
+		update();
+	}, 2000);
+</script>
